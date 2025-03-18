@@ -4,6 +4,11 @@ date_format = '%d-%m-%Y'
 time_format = '%H:%M'
 current_id = 0
 
+user_emails_pwd = {
+    'johndoe@example.com': 'abc123'
+}
+    
+
 def generate_ID():
     beginning = 'AP-'
     length = 5

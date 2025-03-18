@@ -1,7 +1,7 @@
 import pandas as pd
 import csv
 from datetime import datetime
-from doctor_appointment.data_entry import get_date, get_time, get_patient, get_purpose, get_phone, generate_ID
+from data_entry import get_date, get_time, get_patient, get_purpose, get_phone, generate_ID
 
 class CSV:
     CSV_FILE = 'appointment_data.csv'
@@ -86,8 +86,20 @@ class CSV:
 
     @classmethod
     def delete_appointment(cls): #delete appointment from csv file
+        df = pd.read_csv(cls.CSV_FILE) #read csv file
+        id = input("Enter the ID of the appointment to delete: ")
+        # Remove rows where row 'id' has value of the input ID
+        df_filtered = df[df["id"] != id]
+        df_filtered.to_csv(cls.CSV_FILE, index=False)
+
+
+    @classmethod
+    def update_appointment(cls): #update appointment from csv file
         pass
 
+    @classmethod
+    def recommend_appointment(cls): #recommend appointment from csv file
+        pass
 
 
 def add():
@@ -102,7 +114,8 @@ def add():
 
 
 
-add() #add appointment to csv file
-add() #add appointment to csv file
-add() #add appointment to csv file
-CSV.read_appointments() #read appointments from csv file
+# add() #add appointment to csv file
+# add() #add appointment to csv file
+# add() #add appointment to csv file
+# CSV.read_appointments() #read appointments from csv file
+CSV.delete_appointment() #delete appointment from csv file
