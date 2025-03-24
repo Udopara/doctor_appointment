@@ -95,8 +95,38 @@ class CSV:
 
     @classmethod
     def update_appointment(cls): #update appointment from csv file
-        pass
+        df = pd.read_csv(cls.CSV_FILE)
+        id  = input("Enter the ID of the appointment to update: ")
+        #check if id exists in dataframe
+        if id in df["id"].values:
+            new_time = input("Enter the new time(hh:mm) or press 'Enter' to skip: ")
+            new_name = input("Enter new name if applicable or press 'Enter' to skip: ")
+            new_date = input("Enter the new date of appointment(dd-mm-yyyy) or press 'Enter' to skip: ")
+            new_purpose = input("Enter the new purpose of appointment or press 'Enter' to skip: ")
+            new_phone_number = input("Enter the new phone number of patient or press 'Enter' to skip: ")
+            if new_time:
+                df.loc[df["id"] == id, "time"] = new_time
+                df.to_csv(cls.CSV_FILE, index=False)
+                print ("Appointment updated successfully")
+            if new_name:
+                df.loc[df["id"] == id, "name"] = new_name
+                df.to_csv(cls.CSV_FILE, index=False)
+                print ("Appointment updated successfully")
+            if new_date:
+                df.loc[df["id"] ==id, "date"] = new_date
+                df.to_csv(cls.CSV_FILE, index=False)
+                print("Appointment updated successfully")
+            if new_purpose:
+                df.loc[df["id"] ==id, "purpose"] = new_purpose
+                df.to_csv(cls.CSV_FILE,index=False)
+                print("Appointment updated successfully")
+                if new_phone_number:
+                    df.loc[df["id"] ==id,"phone_number"] = new_phone_number
+                    df.to_csv(cls.CSV_FILE, index=False)
+                    print("Appointment updated successfully")
 
+    
+        
     @classmethod
     def recommend_appointment(cls): #recommend appointment from csv file
         pass
@@ -113,9 +143,7 @@ def add():
     CSV.add_appointment(id, date, time, patient, purpose, phone) #add appointment
 
 
-
-# add() #add appointment to csv file
-# add() #add appointment to csv file
-# add() #add appointment to csv file
-# CSV.read_appointments() #read appointments from csv file
+add() #add appointment to csv file
+CSV.read_appointments() #read appointments from csv file
+CSV.update_appointment() # updates appointment
 CSV.delete_appointment() #delete appointment from csv file
