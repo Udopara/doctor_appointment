@@ -1,7 +1,9 @@
 import pandas as pd
 import csv
 from datetime import datetime
-from data_entry import get_date, get_time, get_patient, get_purpose, get_phone, generate_ID
+from data_entry import get_date, get_time, get_patient, get_purpose, get_phone, generate_ID,  prompt_for_credentials
+from recommendations import HospitalRecommender
+import signal
 
 class CSV:
     CSV_FILE = 'appointment_data.csv'
@@ -38,7 +40,7 @@ class CSV:
     def read_appointments(cls):  # Read appointments from CSV file
         patient = input("Enter the patient name or press enter to skip: ")  # Get patient name from user
         start_date = input("Enter the start date (dd-mm-yyyy) or press enter to skip: ")  # Get start date
-        end_date = input("Enter the end date (dd-mm-yyyy) or press enter to skip: ")  # Get end date
+        end_date = input("Enter the end date (dd-mm-yyyy) or press enter to skip: \n")  # Get end date
         
         # Load the CSV file into a pandas DataFrame
         df = pd.read_csv(cls.CSV_FILE)
@@ -87,6 +89,10 @@ class CSV:
     @classmethod
     def delete_appointment(cls): #delete appointment from csv file
         df = pd.read_csv(cls.CSV_FILE) #read csv file
+        print("Current appointments:")
+        df["date"] = pd.to_datetime(df["date"], format=cls.FORMAT)  # Convert date column to datetime
+        df["date"] = pd.to_datetime(df["date"], format=cls.FORMAT)  # Convert date column to datetime
+        print(df.to_string(index=False, formatters={"date": lambda x: x.strftime(cls.FORMAT)}), end='\n')
         id = input("Enter the ID of the appointment to delete: ")
         # Remove rows where row 'id' has value of the input ID
         df_filtered = df[df["id"] != id]
@@ -156,7 +162,37 @@ def add():
     CSV.add_appointment(id, date, time, patient, purpose, phone) #add appointment
 
 
-add() #add appointment to csv file
-CSV.read_appointments() #read appointments from csv file
-CSV.update_appointment() # updates appointment
-CSV.delete_appointment() #delete appointment from csv file
+print("Welcome to LUVEL Clinic!")
+prompt_for_credentials()
+while True:
+    print("\nPlease select an option:")
+    print("1: Add an appointment")
+    print("2: Read appointments")
+    print("3: Update an appointment")
+    print("4: Delete an appointment")
+    print("5: Recommend a hospital")
+    print("6: Exit")
+
+    choice = input("Enter your choice (1-6): ")
+
+    if choice == '1':
+        add()
+    elif choice == '2':
+        CSV.read_appointments()
+    elif choice == '3':
+        CSV.update_appointment()
+    elif choice == '4':
+        CSV.delete_appointment()
+    elif choice == '5':
+        if pd.read_csv(CSV.CSV_FILE).empty:
+            print("No available appointments to recommend hospitals for.")
+        else:
+            HospitalRecommender.recommend_hospital()
+    elif choice == '6':
+        print("Exiting Appointment Management Sysytem...")
+        print("Saving current state to database...")
+        print("...")
+        print("Saved!! See you next time!")
+        break
+    else:
+        print("Invalid choice. Please select a valid option.")
