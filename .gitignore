@@ -1,2 +1,3 @@
 appointment_data.csv
-_pycache_/
+__pycache__
+last_id.txt
