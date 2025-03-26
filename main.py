@@ -90,10 +90,14 @@ class CSV:
     def delete_appointment(cls): #delete appointment from csv file
         df = pd.read_csv(cls.CSV_FILE) #read csv file
         print("Current appointments:")
-        df["date"] = pd.to_datetime(df["date"], format=cls.FORMAT)  # Convert date column to datetime
-        df["date"] = pd.to_datetime(df["date"], format=cls.FORMAT)  # Convert date column to datetime
         print(df.to_string(index=False, formatters={"date": lambda x: x.strftime(cls.FORMAT)}), end='\n')
-        id = input("Enter the ID of the appointment to delete: ")
+        df_ids = df["id"].values
+        id = input("Enter the ID of the appointment to delete or 'q' to quit: ").upper()
+        while id not in df_ids and id !='Q':
+            print("\nInvalid ID! Please enter invalid ID")
+            id = input("Enter the ID of the appointment to delete or 'q' to quit: ").upper()
+        if id =='Q':
+            return
         # Remove rows where row 'id' has value of the input ID
         df_filtered = df[df["id"] != id]
         df_filtered.to_csv(cls.CSV_FILE, index=False)
@@ -102,9 +106,9 @@ class CSV:
     @classmethod
     def update_appointment(cls): #update appointment from csv file
         df = pd.read_csv(cls.CSV_FILE)
-        id  = input("Enter the ID of the appointment to update: ")
+        id  = input("Enter the ID of the appointment to update or 'q' to quit: ").upper()
         #check if id exists in dataframe
-        if id in df["id"].values:
+        if id in df["id"].values and id != 'Q':
             new_time = input("Enter the new time(hh:mm) or press 'Enter' to skip: ")
             new_name = input("Enter new name if applicable or press 'Enter' to skip: ")
             new_date = input("Enter the new date of appointment(dd-mm-yyyy) or press 'Enter' to skip: ")
@@ -130,6 +134,8 @@ class CSV:
                     df.loc[df["id"] ==id,"phone_number"] = new_phone_number
                     df.to_csv(cls.CSV_FILE, index=False)
                     print("Appointment updated successfully")
+        elif id == 'Q':
+            return
 
     
         
