@@ -18,23 +18,33 @@ class CSV:
 
 
     @classmethod
-    def add_appointment(cls, id, date, time, patient, purpose, phone): #add appointment to csv file
-        new_appointment = {
-            'id': id, 
-            'date': date,
-            'time': time,
-            'patient': patient,
-            'purpose': purpose,
-            'phone': phone
-        } #create new appointment dictionary
+    def add_appointment(cls):
+        functions = [get_date, get_time, get_patient, get_purpose, get_phone]  # List of functions to get input from the user
+        fields = ['date', 'time', 'patient', 'purpose', 'phone']  # Corresponding fields in the dictionary
 
-        with open(cls.CSV_FILE, mode='a', newline='') as csvfile: #open csv file in append mode, don't add new line character
-            writer = csv.DictWriter(csvfile, fieldnames=cls.COLUMNS) #create writer object
-            writer.writerow(new_appointment) #write new appointment to csv file
+        # Generate appointment ID
+        id = generate_ID()
 
-        print('Appointment added successfully!')
-        return True
-    
+        # Initialize a dictionary for the new appointment
+        new_appointment = {'id': id}
+
+        # Iterate through functions and fields
+        for function, field in zip(functions, fields):
+            result = function()  # Call the function to get the user input
+            if result == 'q':  # If user enters 'q', return and exit
+                return
+            new_appointment[field] = result  # Assign the result to the corresponding field in the dictionary
+
+        # Write the new appointment to the CSV file
+        try:
+            with open(cls.CSV_FILE, mode='a', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=cls.COLUMNS)
+                writer.writerow(new_appointment)  # Write the new appointment to the CSV file
+
+            print('Appointment added successfully!')
+        except Exception as e:
+            print(f"An error occurred while adding the appointment: {e}")
+        
     @classmethod
     def read_appointments(cls):  # Read appointments from CSV file
         patient = input("Enter the patient name or press enter to skip: ")  # Get patient name from user
@@ -150,19 +160,12 @@ class CSV:
             print("\nSorry, no recommendation available for that organ/body part.")
 
 
-def add():
-    CSV.initialize_csv() #initialize csv file
-    id = generate_ID() #generate appointment ID
-    date = get_date("Enter the date of the appointment (dd-mm-yyyy) or enter for today's date: ", allow_default=True) #get date from user
-    time = get_time('Enter the time of the appointment (hh:mm): ') #get time from user
-    patient = get_patient() #get patient name from user
-    purpose = get_purpose() #get purpose of appointment from user
-    phone = get_phone() #get phone number from user
-    CSV.add_appointment(id, date, time, patient, purpose, phone) #add appointment
+
 
 
 print("Welcome to LUVEL Clinic!")
 prompt_for_credentials()
+CSV.initialize_csv()
 while True:
     print("\nPlease select an option:")
     print("1: Add an appointment")
@@ -175,7 +178,7 @@ while True:
     choice = input("Enter your choice (1-6): ")
 
     if choice == '1':
-        add()
+        CSV.add_appointment()
     elif choice == '2':
         CSV.read_appointments()
     elif choice == '3':
