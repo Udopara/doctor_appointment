@@ -3,7 +3,6 @@ import csv
 from datetime import datetime
 from data_entry import get_date, get_time, get_patient, get_purpose, get_phone, generate_ID,  prompt_for_credentials
 from recommendations import HospitalRecommender
-import signal
 
 class CSV:
     CSV_FILE = 'appointment_data.csv'
