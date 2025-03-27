@@ -47,9 +47,15 @@ class CSV:
         
     @classmethod
     def read_appointments(cls):  # Read appointments from CSV file
-        patient = input("Enter the patient name or press enter to skip: ")  # Get patient name from user
-        start_date = input("Enter the start date (dd-mm-yyyy) or press enter to skip: ")  # Get start date
-        end_date = input("Enter the end date (dd-mm-yyyy) or press enter to skip: \n")  # Get end date
+        patient = input("Enter the patient name or press enter to skip or 'q' to quit: ")  # Get patient name from user
+        if patient.lower() == 'q':  # If user enters 'q', return and exit
+            return
+        start_date = input("Enter the start date (dd-mm-yyyy) or press enter to skip or 'q' to quit: ")  # Get start date
+        if start_date.lower() == 'q':  # If user enters 'q', return and exit
+            return
+        end_date = input("Enter the end date (dd-mm-yyyy) or press enter to skip or 'q' to quit: \n")  # Get end date
+        if end_date.lower() == 'q':  # If user enters 'q', return and exit
+            return
         
         # Load the CSV file into a pandas DataFrame
         df = pd.read_csv(cls.CSV_FILE)
@@ -100,9 +106,10 @@ class CSV:
         df = pd.read_csv(cls.CSV_FILE) #read csv file
         print("Current appointments:")
         df["date"] = pd.to_datetime(df["date"], format=cls.FORMAT)  # Convert date column to datetime
-        df["date"] = pd.to_datetime(df["date"], format=cls.FORMAT)  # Convert date column to datetime
         print(df.to_string(index=False, formatters={"date": lambda x: x.strftime(cls.FORMAT)}), end='\n')
-        id = input("Enter the ID of the appointment to delete: ")
+        id = input("Enter the ID of the appointment to delete or 'q' to quit: ")
+        if id.lower() == 'q':  # If user enters 'q', return and exit
+            return
         # Remove rows where row 'id' has value of the input ID
         df_filtered = df[df["id"] != id]
         df_filtered.to_csv(cls.CSV_FILE, index=False)
@@ -111,14 +118,26 @@ class CSV:
     @classmethod
     def update_appointment(cls): #update appointment from csv file
         df = pd.read_csv(cls.CSV_FILE)
-        id  = input("Enter the ID of the appointment to update: ")
+        id  = input("Enter the ID of the appointment to update or 'q' to quit: ")
+        if id.lower() == 'q':  # If user enters 'q', return and exit
+            return
         #check if id exists in dataframe
         if id in df["id"].values:
-            new_time = input("Enter the new time(hh:mm) or press 'Enter' to skip: ")
-            new_name = input("Enter new name if applicable or press 'Enter' to skip: ")
-            new_date = input("Enter the new date of appointment(dd-mm-yyyy) or press 'Enter' to skip: ")
-            new_purpose = input("Enter the new purpose of appointment or press 'Enter' to skip: ")
-            new_phone_number = input("Enter the new phone number of patient or press 'Enter' to skip: ")
+            new_time = input("Enter the new time(hh:mm) or press 'Enter' to skip or 'q' to quit: ")
+            if new_time.lower() == 'q':  # If user enters 'q', return and exit
+                return
+            new_name = input("Enter new name if applicable or press 'Enter' to skip or 'q' to quit: ")
+            if new_name.lower() == 'q':  # If user enters 'q', return and exit
+                return
+            new_date = input("Enter the new date of appointment(dd-mm-yyyy) or press 'Enter' to skip or 'q' to quit: ")
+            if new_date.lower() == 'q':  # If user enters 'q', return and exit
+                return
+            new_purpose = input("Enter the new purpose of appointment or press 'Enter' to skip or 'q' to quit: ")
+            if new_purpose.lower() == 'q':  # If user enters 'q', return and exit
+                return
+            new_phone_number = input("Enter the new phone number of patient or press 'Enter' to skip or 'q' to quit: ")
+            if new_phone_number.lower() == 'q':  # If user enters 'q', return and exit
+                return
             if new_time:
                 df.loc[df["id"] == id, "time"] = new_time
                 df.to_csv(cls.CSV_FILE, index=False)
@@ -147,7 +166,9 @@ class CSV:
         df = pd.read_csv(cls.CSV_FILE)
         
         # Get user input
-        organ = input("Enter the organ or body part you are having issues with: ").strip().lower()
+        organ = input("Enter the organ or body part you are having issues with or 'q' to quit: ").strip().lower()
+        if organ == 'q':
+            return
         
         # Search for the hospital recommendation
         recommendation = df[df["organ"] == organ]
