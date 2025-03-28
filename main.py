@@ -1,13 +1,12 @@
 import pandas as pd
 import csv
 from datetime import datetime
-from data_entry import get_date, get_time, get_patient, get_purpose, get_phone, generate_ID,  prompt_for_credentials
+from data_entry import get_date, get_time, get_patient, get_purpose, get_phone, get_email, get_new_phone, get_new_date, generate_ID,  prompt_for_credentials
 from recommendations import HospitalRecommender
-import signal
 
 class CSV:
     CSV_FILE = 'appointment_data.csv'
-    COLUMNS = ['id','date', 'time', 'patient', 'purpose', 'phone']
+    COLUMNS = ['id','date', 'time', 'patient', 'purpose', 'phone', 'email']
     FORMAT = '%d-%m-%Y'
     @classmethod
     def initialize_csv(cls): #create csv file if it doesn't exist
@@ -19,28 +18,44 @@ class CSV:
 
 
     @classmethod
-    def add_appointment(cls, id, date, time, patient, purpose, phone): #add appointment to csv file
-        new_appointment = {
-            'id': id, 
-            'date': date,
-            'time': time,
-            'patient': patient,
-            'purpose': purpose,
-            'phone': phone
-        } #create new appointment dictionary
+    def add_appointment(cls):
+        functions = [get_date, get_time, get_patient, get_purpose, get_phone, get_email]  # List of functions to get input from the user
+        fields = ['date', 'time', 'patient', 'purpose', 'phone', 'email']  # Corresponding fields in the dictionary
 
-        with open(cls.CSV_FILE, mode='a', newline='') as csvfile: #open csv file in append mode, don't add new line character
-            writer = csv.DictWriter(csvfile, fieldnames=cls.COLUMNS) #create writer object
-            writer.writerow(new_appointment) #write new appointment to csv file
+        # Generate appointment ID
+        id = generate_ID()
 
-        print('Appointment added successfully!')
-        return True
-    
+        # Initialize a dictionary for the new appointment
+        new_appointment = {'id': id}
+
+        # Iterate through functions and fields
+        for function, field in zip(functions, fields):
+            result = function()  # Call the function to get the user input
+            if result == 'q':  # If user enters 'q', return and exit
+                return
+            new_appointment[field] = result  # Assign the result to the corresponding field in the dictionary
+
+        # Write the new appointment to the CSV file
+        try:
+            with open(cls.CSV_FILE, mode='a', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=cls.COLUMNS)
+                writer.writerow(new_appointment)  # Write the new appointment to the CSV file
+
+            print('Appointment added successfully!')
+        except Exception as e:
+            print(f"An error occurred while adding the appointment: {e}")
+        
     @classmethod
     def read_appointments(cls):  # Read appointments from CSV file
-        patient = input("Enter the patient name or press enter to skip: ")  # Get patient name from user
-        start_date = input("Enter the start date (dd-mm-yyyy) or press enter to skip: ")  # Get start date
-        end_date = input("Enter the end date (dd-mm-yyyy) or press enter to skip: \n")  # Get end date
+        patient = input("Enter the patient name or press enter to skip or 'q' to quit: ")  # Get patient name from user
+        if patient.lower() == 'q':  # If user enters 'q', return and exit
+            return
+        start_date = input("Enter the start date (dd-mm-yyyy) or press enter to skip or 'q' to quit: ")  # Get start date
+        if start_date.lower() == 'q':  # If user enters 'q', return and exit
+            return
+        end_date = input("Enter the end date (dd-mm-yyyy) or press enter to skip or 'q' to quit: \n")  # Get end date
+        if end_date.lower() == 'q':  # If user enters 'q', return and exit
+            return
         
         # Load the CSV file into a pandas DataFrame
         df = pd.read_csv(cls.CSV_FILE)
@@ -117,15 +132,15 @@ class CSV:
             if new_time:
                 df.loc[df["id"] == id, "time"] = new_time
                 df.to_csv(cls.CSV_FILE, index=False)
-                print ("Appointment updated successfully")
+
             if new_name:
                 df.loc[df["id"] == id, "name"] = new_name
                 df.to_csv(cls.CSV_FILE, index=False)
-                print ("Appointment updated successfully")
+
             if new_date:
                 df.loc[df["id"] ==id, "date"] = new_date
                 df.to_csv(cls.CSV_FILE, index=False)
-                print("Appointment updated successfully")
+
             if new_purpose:
                 df.loc[df["id"] ==id, "purpose"] = new_purpose
                 df.to_csv(cls.CSV_FILE,index=False)
@@ -136,7 +151,6 @@ class CSV:
                     print("Appointment updated successfully")
         elif id == 'Q':
             return
-
     
         
     @classmethod
@@ -144,7 +158,9 @@ class CSV:
         df = pd.read_csv(cls.CSV_FILE)
         
         # Get user input
-        organ = input("Enter the organ or body part you are having issues with: ").strip().lower()
+        organ = input("Enter the organ or body part you are having issues with or 'q' to quit: ").strip().lower()
+        if organ == 'q':
+            return
         
         # Search for the hospital recommendation
         recommendation = df[df["organ"] == organ]
@@ -157,48 +173,41 @@ class CSV:
             print("\nSorry, no recommendation available for that organ/body part.")
 
 
-def add():
-    CSV.initialize_csv() #initialize csv file
-    id = generate_ID() #generate appointment ID
-    date = get_date("Enter the date of the appointment (dd-mm-yyyy) or enter for today's date: ", allow_default=True) #get date from user
-    time = get_time('Enter the time of the appointment (hh:mm): ') #get time from user
-    patient = get_patient() #get patient name from user
-    purpose = get_purpose() #get purpose of appointment from user
-    phone = get_phone() #get phone number from user
-    CSV.add_appointment(id, date, time, patient, purpose, phone) #add appointment
 
 
-print("Welcome to LUVEL Clinic!")
-prompt_for_credentials()
-while True:
-    print("\nPlease select an option:")
-    print("1: Add an appointment")
-    print("2: Read appointments")
-    print("3: Update an appointment")
-    print("4: Delete an appointment")
-    print("5: Recommend a hospital")
-    print("6: Exit")
+if __name__ == '__main__':
+    print("Welcome to LUVEL Clinic!")
+    prompt_for_credentials()
+    CSV.initialize_csv()
+    while True:
+        print("\nPlease select an option:")
+        print("1: Add an appointment")
+        print("2: Read appointments")
+        print("3: Update an appointment")
+        print("4: Delete an appointment")
+        print("5: Recommend a hospital")
+        print("6: Exit")
 
-    choice = input("Enter your choice (1-6): ")
+        choice = input("Enter your choice (1-6): ")
 
-    if choice == '1':
-        add()
-    elif choice == '2':
-        CSV.read_appointments()
-    elif choice == '3':
-        CSV.update_appointment()
-    elif choice == '4':
-        CSV.delete_appointment()
-    elif choice == '5':
-        if pd.read_csv(CSV.CSV_FILE).empty:
-            print("No available appointments to recommend hospitals for.")
+        if choice == '1':
+            CSV.add_appointment()
+        elif choice == '2':
+            CSV.read_appointments()
+        elif choice == '3':
+            CSV.update_appointment()
+        elif choice == '4':
+            CSV.delete_appointment()
+        elif choice == '5':
+            if pd.read_csv(CSV.CSV_FILE).empty:
+                print("No available appointments to recommend hospitals for.")
+            else:
+                HospitalRecommender.recommend_hospital()
+        elif choice == '6':
+            print("Exiting Appointment Management Sysytem...")
+            print("Saving current state to database...")
+            print("...")
+            print("Saved!! See you next time!")
+            break
         else:
-            HospitalRecommender.recommend_hospital()
-    elif choice == '6':
-        print("Exiting Appointment Management Sysytem...")
-        print("Saving current state to database...")
-        print("...")
-        print("Saved!! See you next time!")
-        break
-    else:
-        print("Invalid choice. Please select a valid option.")
+            print("Invalid choice. Please select a valid option.")
