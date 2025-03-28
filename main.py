@@ -105,10 +105,13 @@ class CSV:
     def delete_appointment(cls): #delete appointment from csv file
         df = pd.read_csv(cls.CSV_FILE) #read csv file
         print("Current appointments:")
-        df["date"] = pd.to_datetime(df["date"], format=cls.FORMAT)  # Convert date column to datetime
         print(df.to_string(index=False, formatters={"date": lambda x: x.strftime(cls.FORMAT)}), end='\n')
-        id = input("Enter the ID of the appointment to delete or 'q' to quit: ")
-        if id.lower() == 'q':  # If user enters 'q', return and exit
+        df_ids = df["id"].values
+        id = input("Enter the ID of the appointment to delete or 'q' to quit: ").upper()
+        while id not in df_ids and id !='Q':
+            print("\nInvalid ID! Please enter invalid ID")
+            id = input("Enter the ID of the appointment to delete or 'q' to quit: ").upper()
+        if id =='Q':
             return
         # Remove rows where row 'id' has value of the input ID
         df_filtered = df[df["id"] != id]
@@ -118,39 +121,14 @@ class CSV:
     @classmethod
     def update_appointment(cls): #update appointment from csv file
         df = pd.read_csv(cls.CSV_FILE)
-        print("Current appointments:")
-        df["date"] = pd.to_datetime(df["date"], format=cls.FORMAT)  # Convert date column to datetime
-        print(df.to_string(index=False, formatters={"date": lambda x: x.strftime(cls.FORMAT)}), end='\n')
-        id  = input("Enter the ID of the appointment to update or 'q' to quit: ")
-        if id.lower() == 'q':  # If user enters 'q', return and exit
-            return
+        id  = input("Enter the ID of the appointment to update or 'q' to quit: ").upper()
         #check if id exists in dataframe
-        if id in df["id"].values:
-            new_time = input("Enter the new time(hh:mm) or 'enter' to skip or 'q' to quit: ")
-            if new_time.lower() == 'q':  # If user enters 'q', return and exit
-                return
-            
-            new_name = input("Enter the new name or 'enter' to skip or 'q' to quit: ")
-            if new_name.lower() == 'q':  # If user enters 'q', return and exit
-                return
-            
-            new_date = get_new_date()
-            if new_date.lower() == 'q':  # If user enters 'q', return and exit
-                return
-            
-            
-            new_purpose = input("Enter the new purpose or 'enter' to skip or 'q' to quit: ")
-            if new_purpose.lower() == 'q':  # If user enters 'q', return and exit
-                return
-            
-            new_phone_number = get_new_phone()
-            if new_phone_number.lower() == 'q':  # If user enters 'q', return and exit
-                return
-            
-            new_email = get_email("Enter the new email or 'enter' to skip or 'q' to quit: ")
-            if new_email.lower() == 'q':  # If user enters 'q', return and exit
-                return
-
+        if id in df["id"].values and id != 'Q':
+            new_time = input("Enter the new time(hh:mm) or press 'Enter' to skip: ")
+            new_name = input("Enter new name if applicable or press 'Enter' to skip: ")
+            new_date = input("Enter the new date of appointment(dd-mm-yyyy) or press 'Enter' to skip: ")
+            new_purpose = input("Enter the new purpose of appointment or press 'Enter' to skip: ")
+            new_phone_number = input("Enter the new phone number of patient or press 'Enter' to skip: ")
             if new_time:
                 df.loc[df["id"] == id, "time"] = new_time
                 df.to_csv(cls.CSV_FILE, index=False)
@@ -166,17 +144,13 @@ class CSV:
             if new_purpose:
                 df.loc[df["id"] ==id, "purpose"] = new_purpose
                 df.to_csv(cls.CSV_FILE,index=False)
-
-            if new_phone_number:
-                df.loc[df["id"] ==id,"phone_number"] = new_phone_number
-                df.to_csv(cls.CSV_FILE, index=False)
-
-            if new_email:
-                df.loc[df["id"] ==id,"email"] = new_email
-                df.to_csv(cls.CSV_FILE, index=False)
-            
-            print("Appointment updated successfully")
-
+                print("Appointment updated successfully")
+                if new_phone_number:
+                    df.loc[df["id"] ==id,"phone_number"] = new_phone_number
+                    df.to_csv(cls.CSV_FILE, index=False)
+                    print("Appointment updated successfully")
+        elif id == 'Q':
+            return
     
         
     @classmethod
