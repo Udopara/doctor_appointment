@@ -38,8 +38,8 @@ def generate_ID():
 
 
 
-def get_date(): 
-    date_str = input("Enter the date of the appointment (dd-mm-yyyy) or 'enter' for today's date or 'q' to quit: ").lower() #get date from user 
+def get_date(prompt = "Enter the date of the appointment (dd-mm-yyyy) or 'enter' for today's date or 'q' to quit: "): 
+    date_str = input(prompt).lower() #get date from user 
     if date_str == 'q':
         return date_str
     if date_str == '':
@@ -52,8 +52,8 @@ def get_date():
         print('Invalid date! Please enter date in dd-mm-yyyy format.')
         return get_date() #ask user for date again
 
-def get_time(): #get time from user
-    time_str = input("Enter the new time(hh:mm) or press 'Enter' to skip or 'q' to quit: ").lower() #get time from user
+def get_time(prompt = "Enter the new time(hh:mm) or 'q' to quit: "): #get time from user
+    time_str = input(prompt).lower() #get time from user
     if time_str == 'q':
         return time_str
     try:
@@ -63,22 +63,25 @@ def get_time(): #get time from user
         print('Invalid time! Please enter time in HH:MM format.')
         return get_time() #ask user for time again
 
-def get_patient(): #get patient name from user
-    patient = input("Enter the patient name  or 'q' to quit: ").lower() #get patient name from user
+def get_patient(prompt = "Enter the patient name  or 'q' to quit: "): #get patient name from user
+    patient = input(prompt).lower() #get patient name from user
     if patient == '': #if patient name is empty
         print('Patient name cannot be empty!') #print error message
         return get_patient() #ask user for patient name again
     return patient
     
-def get_purpose(): #get purpose of appointment from user
-    purpose = input("Enter the purpose of the appointment or 'q' to quit: ").lower() #get purpose of appointment from user
+def get_purpose(prompt = "Enter the purpose of the appointment or 'q' to quit: "): #get purpose of appointment from user
+    purpose = input(prompt).lower() #get purpose of appointment from user
     if purpose == '': #if purpose is empty
         print('Purpose cannot be empty!') #print error message
         return get_purpose() #ask user for purpose again
     return purpose #return valid purpose
 
-def get_phone(): #get phone number from user
-    phone = input("Enter the phone number or 'q' to quit: ").lower() #get phone number from user
+def get_phone(prompt = "Enter the phone number or 'q' to quit: "): #get phone number from user
+    phone = input(prompt).lower() #get phone number from user
+
+    if phone == 'q':
+        return phone
 
     if phone == '': #if phone number is empty
         print('Phone number cannot be empty!') #print error message
@@ -94,5 +97,47 @@ def get_phone(): #get phone number from user
     
     return phone #return valid phone number
 
-if __name__ == '__main__':    
+def get_email(prompt = "Enter the email address or 'q' to quit: "): #get email from user
+    email = input(prompt).lower() #get email address from user
+    if email == 'q':
+        return email
+    if email == '': #if email is empty
+        print('Email cannot be empty!') #print error message
+        return get_email() #ask user for email again
+    email_parts = email.split('@') #split email address into parts
+    if len(email_parts) != 2: #if email address doesn't contain '@'
+        print('Invalid email address! Please enter a valid email address.') #print error message
+        return get_email() #ask user for email again
+    return email #return valid email address
+
+def get_new_date():
+    while True:
+        new_date = input("Enter the new date (dd-mm-yyyy) or press 'enter' to skip or 'q' to quit: ").strip()
+        if new_date.lower() == 'q':  # If user enters 'q', return 'q'
+            return 'q'
+        if new_date == '':  # If user enters an empty string, return None
+            return new_date
+        try:
+            # Try to convert the input to a datetime object
+            return datetime.strptime(new_date, '%d-%m-%Y')
+        except ValueError:
+            print("Invalid date format. Please use dd-mm-yyyy.")
+
+def get_new_phone(prompt="Enter the new phone number (10 digits) or press 'enter' to skip or 'q' to quit: "):
+    while True:
+        phone = input(prompt).strip().lower()  # Get input from the user
+        if phone == 'q':  # If user enters 'q', return 'q'
+            return 'q'
+        if phone == '':  # If user enters an empty string, return ''
+            return ''
+        if not phone.isdigit():  # Check if the input contains only digits
+            print("Invalid phone number! Please enter a valid 10-digit phone number.")
+            continue
+        if len(phone) != 10:  # Check if the phone number is exactly 10 digits long
+            print("Invalid phone number! Phone number must be 10 digits long.")
+            continue
+        return phone  # Return the valid phone number
+
+
+if __name__ == '__main__':   
     pass
