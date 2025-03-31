@@ -8,6 +8,75 @@ import smtplib
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 
+def fetch_appointments(conn):
+    patient = input("Enter the patient name or press enter to skip or 'q' to quit: ").strip()
+    if patient.lower() == 'q':
+        return
+
+    while True:
+        start_date = input("Enter the start date (yyyy-mm-dd) or press enter to skip or 'q' to quit: ").strip()
+        if start_date.lower() == 'q':
+            return
+        if start_date == "" or is_valid_date(start_date):
+            break
+        print("Invalid date format. Please enter a valid date in YYYY-MM-DD format.")
+
+    while True:
+        end_date = input("Enter the end date (yyyy-mm-dd) or press enter to skip or 'q' to quit: ").strip()
+        if end_date.lower() == 'q':
+            return
+        if end_date == "" or is_valid_date(end_date):
+            if start_date and end_date and not compare_dates(start_date, end_date):
+                print("End date cannot be earlier than start date. Please enter a valid date range.")
+                continue
+            break
+        print("Invalid date format. Please enter a valid date in YYYY-MM-DD format.")
+
+    conditions = []
+    params = []
+
+    if start_date:
+        conditions.append("Date >= ?")
+        params.append(start_date)
+
+    if end_date:
+        conditions.append("Date <= ?")
+        params.append(end_date)
+
+    if patient:
+        conditions.append("Patient LIKE ?")
+        params.append(f"%{patient}%")  # Allows partial match
+
+    query = "SELECT * FROM appointments"
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+
+    try:
+        with conn:
+            rows = conn.execute(query, params).fetchall()
+            if rows:
+                print("\nAppointments found:")
+                return rows
+            else:
+                print("\nNo appointments match the criteria.")
+                return None
+        
+    except sqlite3.Error as e:
+        print(f"Error fetching appointments: {e}")
+
+    # If no filters were applied, fetch all appointments
+    if not start_date and not end_date and not patient:
+        print("\nNo filters applied. Showing all appointments:")
+        try:
+            with conn:
+                rows = conn.execute("SELECT * FROM appointments").fetchall()
+                if rows:
+                    print("\nAppointments found:")
+                    return rows
+                else:
+                    print("\nNo appointments found.")
+        except sqlite3.Error as e:
+            print(f"Error fetching all appointments: {e}")
 def delete_appointment(conn):
     show_query = "SELECT * FROM appointments"
     try:
@@ -240,7 +309,7 @@ def send_reminder(conn):
         print(f"Reminder to {patient_name} sent sucessfully.")
     
 
-# Laura
+
 def main():
     print("Welcome to LUVEL Clinic!")
     prompt_for_credentials()

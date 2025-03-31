@@ -11,6 +11,19 @@ user_emails_pwd = {
     'admin': 'admin'
 }
 
+# To get the doctor to log in
+def prompt_for_credentials():
+    while True:
+        email = input("Enter your email: ")
+        password = getpass.getpass("Enter your password: ")  # we use getpass to hide password input
+        if email in user_emails_pwd and user_emails_pwd[email] == password:
+            print("Login successful!")
+            break
+        else:
+            print("Invalid email or password. Please try again or type 'quit' to exit.")
+            if email.lower() == 'quit':
+                exit()
+
 def get_date(prompt = "Enter the date of the appointment (yyyy-mm-dd) or 'enter' for today's date or 'q' to quit: "): 
     date_str = input(prompt).lower() #get date from user 
     if date_str == 'q':
@@ -44,6 +57,12 @@ def get_patient(prompt = "Enter the patient name  or 'q' to quit: "): #get patie
         return get_patient() #ask user for patient name again
     return patient
     
+def get_purpose(prompt = "Enter the purpose of the appointment or 'q' to quit: "): #get purpose of appointment from user
+    purpose = input(prompt).lower() #get purpose of appointment from user
+    if purpose == '': #if purpose is empty
+        print('Purpose cannot be empty!') #print error message
+        return get_purpose() #ask user for purpose again
+    return purpose #return valid purpose
 
 def get_phone(prompt = "Enter the phone number or 'q' to quit: "): #get phone number from user
     phone = input(prompt).lower() #get phone number from user
