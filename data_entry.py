@@ -25,6 +25,26 @@ def get_date(prompt = "Enter the date of the appointment (yyyy-mm-dd) or 'enter'
         print('Invalid date! Please enter date in yyyy-mm-dd format.')
         return get_date() #ask user for date again
 
+def get_time(prompt = "Enter the new time(hh:mm) or 'q' to quit: "): #get time from user
+    time_str = input(prompt).lower() #get time from user
+    if time_str == 'q':
+        return time_str
+    try:
+        valid_time = datetime.strptime(time_str, time_format) #convert time string to datetime object
+        return valid_time.strftime(time_format) #return formatted time string
+    except ValueError: #if time is invalid
+        print('Invalid time! Please enter time in HH:MM format.')
+        return get_time() #ask user for time again
+
+
+def get_patient(prompt = "Enter the patient name  or 'q' to quit: "): #get patient name from user
+    patient = input(prompt).lower() #get patient name from user
+    if patient == '': #if patient name is empty
+        print('Patient name cannot be empty!') #print error message
+        return get_patient() #ask user for patient name again
+    return patient
+    
+
 def get_phone(prompt = "Enter the phone number or 'q' to quit: "): #get phone number from user
     phone = input(prompt).lower() #get phone number from user
 
