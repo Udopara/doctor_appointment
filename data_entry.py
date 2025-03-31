@@ -64,6 +64,33 @@ def get_purpose(prompt = "Enter the purpose of the appointment or 'q' to quit: "
         return get_purpose() #ask user for purpose again
     return purpose #return valid purpose
 
+def get_email(prompt = "Enter the email address or 'q' to quit: "): #get email from user
+    email = input(prompt).lower() #get email address from user
+    if email == 'q':
+        return email
+    if email == '': #if email is empty
+        print('Email cannot be empty!') #print error message
+        return get_email() #ask user for email again
+    email_parts = email.split('@') #split email address into parts
+    if len(email_parts) != 2: #if email address doesn't contain '@'
+        print('Invalid email address! Please enter a valid email address.') #print error message
+        return get_email() #ask user for email again
+    return email #return valid email address
+
+
+def get_new_date():
+    while True:
+        new_date = input("Enter the new date (dd-mm-yyyy) or press 'enter' to skip or 'q' to quit: ").strip()
+        if new_date.lower() == 'q':  # If user enters 'q', return 'q'
+            return 'q'
+        if new_date == '':  # If user enters an empty string, return None
+            return new_date
+        try:
+            # Try to convert the input to a datetime object
+            return datetime.strptime(new_date, '%d-%m-%Y')
+        except ValueError:
+            print("Invalid date format. Please use dd-mm-yyyy.")
+
 def get_phone(prompt = "Enter the phone number or 'q' to quit: "): #get phone number from user
     phone = input(prompt).lower() #get phone number from user
 

@@ -8,6 +8,66 @@ import smtplib
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 
+def is_valid_date(date_str):
+    """Check if the input follows the YYYY-MM-DD format using regex."""
+    return bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", date_str))
+
+def compare_dates(start_date, end_date):
+    """Ensure end_date is not earlier than start_date."""
+    return start_date <= end_date
+
+def get_connection():
+    try:
+        conn = sqlite3.connect('luvel.db')
+        print("Connected to SQLite successfully!")
+        return conn
+    except sqlite3.Error as e:
+        print(f"Error connecting to SQLite: {e}")
+        return None
+    
+def create_table(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS appointments (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Date TEXT NOT NULL,
+                Time TEXT NOT NULL,
+                Patient TEXT NOT NULL,
+                Purpose TEXT NOT NULL,
+                Phone INTEGER NOT NULL,
+                Email TEXT NOT NULL
+            )
+        ''')
+        conn.commit()
+        print("Table created successfully!")
+    except sqlite3.Error as e:
+        print(f"Error creating table: {e}")
+
+def insert_appointment(conn):
+    functions = [get_date, get_time, get_patient, get_purpose, get_phone, get_email]  # List of functions to get input from the user
+    fields = ['date', 'time', 'patient', 'purpose', 'phone', 'email']  # Corresponding fields in the dictionary
+
+
+    # Initialize a dictionary for the new appointment
+    new_appointment = {}
+
+    # Iterate through functions and fields
+    for function, field in zip(functions, fields):
+        result = function()  # Call the function to get the user input
+        if result == 'q':  # If user enters 'q', return and exit
+            return
+        new_appointment[field] = result  # Assign the result to the corresponding field in the dictionary
+    query = """
+INSERT INTO appointments(date, time, patient, purpose, phone, email) VALUES (?, ?, ?, ?, ?, ?)
+"""
+    try:
+        with conn:
+            conn.execute(query, (new_appointment[fields[0]], new_appointment[fields[1]], new_appointment[fields[2]], new_appointment[fields[3]], new_appointment[fields[4]], new_appointment[fields[5]]))
+            print("Appointment sucessfully added")
+    except Exception as e:
+        print('error is', e)
+
 def fetch_appointments(conn):
     patient = input("Enter the patient name or press enter to skip or 'q' to quit: ").strip()
     if patient.lower() == 'q':
@@ -77,6 +137,7 @@ def fetch_appointments(conn):
                     print("\nNo appointments found.")
         except sqlite3.Error as e:
             print(f"Error fetching all appointments: {e}")
+
 def delete_appointment(conn):
     show_query = "SELECT * FROM appointments"
     try:
@@ -208,6 +269,21 @@ def update_appointment(conn):
         print(f"Error updating appointment: {e}")
 
 
+def schedule_reminders(conn, scheduler):
+    with conn:
+        query = "SELECT ID, Date, Time, Email, Patient FROM appointments"
+        appointments = conn.execute(query).fetchall()
+
+    for appointment in appointments:
+        app_id, app_date, app_time, email, patient = appointment
+        appointment_datetime = datetime.strptime(f"{app_date} {app_time}", "%Y-%m-%d %H:%M")
+        reminder_time = appointment_datetime - timedelta(minutes=1) # time for email to send
+
+        if reminder_time > datetime.now():
+            scheduler.add_job(send_reminder_email, 'date', run_date=reminder_time, args=[email, patient, app_date, app_time])
+            print(f"Reminder scheduled for {patient} at {reminder_time}")
+
+
 def send_reminder_email(receiver_email, patient_name, app_date, app_time):
     # sender_email = 'p.opara@alustudent.com'
     # password = 'xbbz xpgd lxka hvpf'
@@ -337,7 +413,11 @@ def main():
                 insert_appointment(conn)
                 schedule_reminders(conn, scheduler)  # Reschedule reminders after adding new appointments
             elif choice == '2':
-                fetch_appointments(conn)
+                appointments = fetch_appointments(conn)
+                if appointments: 
+                    for appointment in appointments:
+                        id, date, time, patient, purpose, phone, email = appointment
+                        print(id, date, time, patient, purpose, phone, email, sep=' | ')
             elif choice == '3':
                 update_appointment(conn)
                 schedule_reminders(conn, scheduler)  # Reschedule in case of time change
