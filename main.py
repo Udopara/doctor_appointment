@@ -289,6 +289,7 @@ def send_reminder_email(receiver_email, patient_name, app_date, app_time):
     # password = 'xbbz xpgd lxka hvpf'
     sender_email = 'luvel.remnder@gmail.com'
     password = 'jjka keni yshl hjkb'
+    patient_name = ' '.join(name.capitalize() for name in patient_name.split(' '))
 
     subject = 'LUVEL Clinic Appointment Reminder'
     body = f"""
@@ -362,6 +363,7 @@ def send_reminder(conn):
 
     sender_email = 'luvel.remnder@gmail.com'
     password = 'jjka keni yshl hjkb'
+    patient_name = ' '.join(name.capitalize() for name in patient_name.split(' '))
 
     subject = 'LUVEL Clinic Appointment Reminder'
     body = f"""
@@ -404,7 +406,7 @@ def main():
             print("2: Read appointments")
             print("3: Update an appointment")
             print("4: Delete an appointment")
-            print("5: Send appointment manually to a patient")
+            print("5: Send reminder manually to a patient")
             print("6: Exit")
 
             choice = input("Enter your choice (1-6): ")
